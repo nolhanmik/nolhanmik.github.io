@@ -2,16 +2,13 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Ma page avec JavaScript</title>
+  <title>Graphique D3</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="chart.js" defer></script>
 </head>
 <body>
-  <h1>Bienvenue !</h1>
-  <button onclick="afficheMessage()">Clique-moi</button>
-
-  <script>
-    function afficheMessage() {
-      alert("Tu as cliqué sur le bouton 🚀");
-    }
-  </script>
+  <h1>Graphique en arbre avec D3.js</h1>
+  <!-- Conteneur pour le SVG -->
+  <div id="chart"></div>
 </body>
 </html>

@@ -61,11 +61,6 @@ function chart() {
   root.y0 = 0;
 
   const tree = d3.tree().nodeSize([dx, dy]);
-
-  const diagonal = d3.linkVertical()
-    .x(d => d.y + centerX - root.y)
-    .y(d => d.x);
-
   svg = d3.create("svg")
     .attr("width", window.innerWidth)
     .attr("height", window.innerHeight)
@@ -89,6 +84,10 @@ function chart() {
 
     tree(root);
     const centerX = window.innerWidth / 2;
+
+    const diagonal = d3.linkVertical()
+    .x(d => d.y + centerX - root.y)
+    .y(d => d.x);
 
     let x0 = Infinity, x1 = -Infinity;
     root.each(d => {

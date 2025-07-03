@@ -7,12 +7,11 @@
   <script src="chart.js" defer></script>
   <style>
     html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      overflow: hidden;
-      font-family: sans-serif;
-    }
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: auto; /* ← autorise le scroll */
+}
 
     h1 {
       margin: 1em 0 0.5em;
@@ -21,19 +20,18 @@
 
     #chart {
       width: 100vw;
-      height: calc(100vh - 3em); /* ajuster selon la hauteur de ton header */
-      overflow: auto;
+      height: auto;       /* ← laisse la div grandir autant que le SVG */
+      overflow: auto;     /* ← ajoute scroll si contenu déborde */
     }
 
-    svg {
+     svg {
       display: block;
-      width: 100%;
-      height: 100%;
+      margin: 0 auto;
     }
   </style>
 </head>
 <body>
-  <h1>🌳 Référentiel 🌳</h1>
+  <h1>🌳 Référentiel s🌳</h1>
   <div id="chart"></div>
 </body>
 </html>

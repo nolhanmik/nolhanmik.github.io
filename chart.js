@@ -63,7 +63,7 @@ function chart() {
   const tree = d3.tree().nodeSize([dx, dy]);
 
   const diagonal = d3.linkVertical()
-    .x(d => d.y)
+    .x(d => d.y + centerX - root.y)
     .y(d => d.x);
 
   svg = d3.create("svg")
@@ -107,7 +107,7 @@ function chart() {
       .data(nodes, d => d.id || (d.id = ++i));
 
     const nodeEnter = node.enter().append("g")
-      .attr("transform", d => `translate(${source.y0},${source.x0})`)
+      .attr("transform", d => `translate(${source.y0 + centerX - root.y},${source.x0})`)
       .on("click", (event, d) => {
         d.children = d.children ? null : d._children;
         update(d);

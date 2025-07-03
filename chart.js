@@ -88,6 +88,7 @@ function chart() {
     const links = root.links();
 
     tree(root);
+    const centerX = window.innerWidth / 2;
 
     let x0 = Infinity, x1 = -Infinity;
     root.each(d => {
@@ -137,8 +138,8 @@ function chart() {
 
     const nodeMerge = nodeEnter.merge(node);
     nodeMerge.transition().duration(500)
-      .attr("transform", d => `translate(${d.y},${d.x})`);
-
+      .attr("transform", d => `translate(${d.y + centerX - root.y},${d.x})`);
+    
     node.exit().transition().duration(500).remove()
       .attr("transform", d => `translate(${source.y},${source.x})`);
 

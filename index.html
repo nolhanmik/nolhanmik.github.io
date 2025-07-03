@@ -31,20 +31,20 @@
   </style>
 </head>
 <body>
-  <h1>🌳 Référentiel DD&RS 🌳</h1>
+  <h1>🌳 Référentiel DD&RS t🌳</h1>
   <div id="chart"></div>
 
   <script>
-  (function() {
+  document.addEventListener("DOMContentLoaded", () => {
     // —————————————
-    // 1) Définis ici tes couleurs manuellement
-    const rootColor    = "#2c3e50";                   // couleur du nœud central
-    const axisColors   = [                           // couleurs des 5 axes
-      "#1f77b4", // 1. Stratégie
-      "#ff7f0e", // 2. Enseignement
-      "#2ca02c", // 3. Recherche
-      "#d62728", // 4. Environnement
-      "#9467bd"  // 5. Sociale
+    // Définition manuelle des couleurs
+    const rootColor  = "#2c3e50";                   
+    const axisColors = [
+      "#1f77b4", // Stratégie
+      "#ff7f0e", // Enseignement
+      "#2ca02c", // Recherche
+      "#d62728", // Environnement
+      "#9467bd"  // Sociale
     ];
     // —————————————
 
@@ -104,36 +104,34 @@
       const tree   = d3.tree().size([2 * Math.PI, radius]);
       const root   = d3.hierarchy(data);
 
-      // – assignation ID + stockage children
-      let idx = 0;
+      // 1) assigner id + stocker les enfants
+      let id = 0;
       root.each(d => {
-        d.id         = idx++;
-        d._children  = d.children || null;
+        d.id        = id++;
+        d._children = d.children || null;
       });
 
-      // – couleur racine
+      // 2) couleur racine
       root.color = rootColor;
 
-      // – couleur de chaque grand axe (depth=1)
-      root.children.forEach((axis, i) => {
-        axis.color = axisColors[i % axisColors.length];
+      // 3) couleur axes (depth=1)
+      root.children.forEach((ax, i) => {
+        ax.color = axisColors[i % axisColors.length];
       });
 
-      // – propagation aux sous-axes (depth≥2)
+      // 4) propagation couleur aux sous-axes (depth>=2)
       root.each(d => {
         if (d.depth >= 2) {
-          // on trouve l'ancêtre depth=1
           let anc = d;
           while (anc.depth > 1) anc = anc.parent;
-          // plus on est profond, plus on éclaircit
-          const factor = 1 + 0.3 * (d.depth - 1);
+          const factor = 0.7 + 0.3 * (d.depth - 1);
           d.color = d3.color(anc.color).brighter(factor).formatHex();
         }
       });
 
       tree(root);
 
-      // – SVG centré avec viewBox
+      // 5) création du SVG centré
       const svg = d3.create("svg")
         .attr("viewBox", [-W/2, -H/2, W, H])
         .style("font", "12px sans-serif")
@@ -142,21 +140,17 @@
       const g     = svg.append("g");
       const linkG = g.append("g").attr("class", "links");
       const nodeG = g.append("g").attr("class", "nodes");
-
       const diagonal = d3.linkRadial()
         .angle(d => d.x)
         .radius(d => d.y);
 
-      // ——— update() ———
+      // 6) fonction update()
       function update() {
         tree(root);
 
-        const links = root.links();
-        const nodes = root.descendants();
-
-        // Liens
+        // liens
         linkG.selectAll("path.link")
-          .data(links, d => d.target.id)
+          .data(root.links(), d => d.target.id)
           .join(
             enter => enter.append("path")
               .attr("class", "link")
@@ -168,9 +162,9 @@
             exit => exit.remove()
           );
 
-        // Nœuds
+        // nœuds
         nodeG.selectAll("g.node")
-          .data(nodes, d => d.id)
+          .data(root.descendants(), d => d.id)
           .join(
             enter => {
               const ng = enter.append("g")
@@ -195,31 +189,27 @@
                   update();
                 });
 
-              // Cercle
+              // cercle
               ng.append("circle")
                 .attr("r", d => d.depth === 0 ? 14 : d.depth === 1 ? 10 : 6)
                 .attr("fill", d => d.color)
                 .attr("stroke", "#333");
 
-              // Texte
-              const text = ng.append("text")
+              // texte
+              ng.append("text")
                 .text(d => d.data.name)
                 .style("font-weight", d => d.depth <= 1 ? "bold" : "normal")
                 .style("font-size", d => d.depth === 0 ? "18px" : "12px")
-                .style("fill", d => d.color);
-
-              if (d.depth === 0) {
-                // titre racine au-dessus, centré
-                text
-                  .attr("dy", "-1.6em")
-                  .attr("text-anchor", "middle");
-              } else {
-                // sous-axes et axes orientés horizontalement
-                text
-                  .attr("dy", "0.31em")
-                  .attr("x", d => d.x < Math.PI ? 12 : -12)
-                  .attr("text-anchor", d => d.x < Math.PI ? "start" : "end");
-              }
+                .style("fill", d => d.color)
+                .attr("dy", d => d.depth === 0 ? "-1.6em" : "0.31em")
+                .attr("text-anchor", d =>
+                  d.depth === 0 ? "middle" :
+                  d.x < Math.PI ? "start" : "end"
+                )
+                .attr("x", d =>
+                  d.depth === 0 ? 0 :
+                  d.x < Math.PI ? 12 : -12
+                );
 
               return ng;
             },
@@ -240,16 +230,15 @@
       return svg.node();
     }
 
-    // Rendu initial + resize
+    // 7) rendu + resize
+    const container = document.getElementById("chart");
     function render() {
-      const c = document.getElementById("chart");
-      c.innerHTML = "";
-      c.appendChild(chart());
+      container.innerHTML = "";
+      container.appendChild(chart());
     }
     window.addEventListener("resize", render);
-    document.addEventListener("DOMContentLoaded", render);
-
-  })();
+    render();
+  });
   </script>
 </body>
 </html>

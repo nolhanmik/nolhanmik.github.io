@@ -1,8 +1,18 @@
 // Exemple de données hiérarchiques
 const data = {
-  name: "Racine",
+  name: "LE REFERENTIEL DD&RS",
   children: [
-    { name: "Branche A" },
+    { 
+      name: "1. Stratégie & Gouvernance"
+      children: [
+        { name: "1.1 Formaliser sa politique DD&RS, l'intégrer à toute l'activité de l'établissement" },
+        { name: "1.2 Déployer des ressources et piloter la stratégie DD&RS" },
+        { name: "1.3 Contribuer à la construction d'une société responsable"} 
+      ]
+    },
+    { name: "2. Enseignement & Formation" },
+    { name: "3. Recherche & Innovation" },
+    { name: "4. Gestion environnementale" },
     {
       name: "Branche B",
       children: [

@@ -18,7 +18,7 @@
     }
     #chart {
       width: 100vw;
-      height: calc(100vh - 3.5em); /* laisse de la place pour le titre */
+      height: calc(100vh - 3.5em);
       overflow: auto;
     }
     svg {
@@ -26,14 +26,20 @@
       width: 100%;
       height: 100%;
     }
+    /* Petite touche pour voir au survol qu’on peut cliquer */
+    .node:hover circle {
+      stroke: orange;
+      stroke-width: 2px;
+    }
   </style>
 </head>
 <body>
-  <h1>🌳 Référentiel DD&RS s🌳</h1>
+  <h1>🌳 Référentiel DD&RS ss🌳</h1>
   <div id="chart"></div>
 
   <script>
   (function() {
+    // 1. Données
     const data = {
       name: "LE REFERENTIEL DD&RS",
       children: [
@@ -83,14 +89,16 @@
       ]
     };
 
+    // 2. Fonction chart() intégrée
     function chart() {
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      const radius = Math.min(w, h) / 2 - 80;
+      const W = window.innerWidth;
+      const H = window.innerHeight;
+      const radius = Math.min(W, H) / 2 - 80;
       const tree = d3.tree().size([2 * Math.PI, radius]);
-
       const root = d3.hierarchy(data);
       let idx = 0;
+
+      // assignation ID + stockage des enfants
       root.each(d => {
         d.id = idx++;
         d._children = d.children || null;
@@ -98,8 +106,9 @@
 
       tree(root);
 
+      // SVG responsive centré via viewBox
       const svg = d3.create("svg")
-        .attr("viewBox", [-w/2, -h/2, w, h])
+        .attr("viewBox", [-W/2, -H/2, W, H])
         .style("font", "12px sans-serif")
         .style("user-select", "none");
 
@@ -110,6 +119,7 @@
         .angle(d => d.x)
         .radius(d => d.y);
 
+      // update – gère enter/update/exit
       function update() {
         tree(root);
         const links = root.links();
@@ -129,20 +139,24 @@
             exit => exit.remove()
           );
 
-        // NŒUDS
+        // NOEUDS
         nodeG.selectAll("g.node")
           .data(nodes, d => d.id)
           .join(
             enter => {
               const ng = enter.append("g")
+                // calcul manuel des coordonnées radiales
                 .attr("class", "node")
-                .attr("transform", d => `
-                  rotate(${d.x * 180/Math.PI - 90})
-                  translate(${d.y},0)
-                `)
+                .attr("transform", d => {
+                  const angle = d.x - Math.PI/2;
+                  const x = d.y * Math.cos(angle);
+                  const y = d.y * Math.sin(angle);
+                  return `translate(${x},${y})`;
+                })
                 .style("cursor", d => d._children ? "pointer" : "default")
                 .on("click", (event, d) => {
                   if (!d._children) return;
+                  // toggle children <-> _children
                   if (d.children) {
                     d._children = d.children;
                     d.children = null;
@@ -152,6 +166,7 @@
                   update();
                 });
 
+              // cercle
               ng.append("circle")
                 .attr("r", d => d.depth === 0 ? 10 : d.depth === 1 ? 8 : 5)
                 .attr("fill", d => {
@@ -161,11 +176,11 @@
                 })
                 .attr("stroke", "#333");
 
+              // texte redressé horizontal
               ng.append("text")
                 .attr("dy", "0.31em")
                 .attr("x", d => d.x < Math.PI ? 12 : -12)
                 .attr("text-anchor", d => d.x < Math.PI ? "start" : "end")
-                .attr("transform", d => d.x >= Math.PI ? "rotate(180)" : null)
                 .text(d => d.data.name)
                 .style("font-weight", d => d.depth <= 1 ? "bold" : "normal")
                 .style("font-size", d => d.depth === 0 ? "16px" : "12px");
@@ -173,10 +188,12 @@
               return ng;
             },
             update => update.transition().duration(300)
-              .attr("transform", d => `
-                rotate(${d.x * 180/Math.PI - 90})
-                translate(${d.y},0)
-              `),
+              .attr("transform", d => {
+                const angle = d.x - Math.PI/2;
+                const x = d.y * Math.cos(angle);
+                const y = d.y * Math.sin(angle);
+                return `translate(${x},${y})`;
+              }),
             exit => exit.remove()
           );
       }
@@ -185,6 +202,7 @@
       return svg.node();
     }
 
+    // 3. Rendu initial + redraw au resize
     function render() {
       const container = document.getElementById("chart");
       container.innerHTML = "";
@@ -197,4 +215,3 @@
   </script>
 </body>
 </html>
-```

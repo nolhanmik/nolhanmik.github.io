@@ -140,5 +140,6 @@ chart = {
 
   update(null, root);
 
-  return svg.node();
+  document.getElementById("chart").appendChild(svg.node());
+
 }

@@ -6,21 +6,34 @@
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <script src="chart.js" defer></script>
   <style>
-    body {
-    margin: 0;
-    font-family: sans-serif;
-    height: 100vh;
-    overflow: auto;
-  }
-  svg {
-    display: block;
-    margin: 0 auto;
-  }
-</style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      font-family: sans-serif;
+    }
+
+    h1 {
+      margin: 1em 0 0.5em;
+      text-align: center;
+    }
+
+    #chart {
+      width: 100vw;
+      height: calc(100vh - 3em); /* ajuster selon la hauteur de ton header */
+      overflow: auto;
+    }
+
+    svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+  </style>
 </head>
 <body>
   <h1>🌳 Référentiel DD&RS 🌳</h1>
   <div id="chart"></div>
 </body>
 </html>
-

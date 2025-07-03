@@ -100,11 +100,18 @@ function chart() {
       translate(${d.y},0)
     `)
     .on("click", (event, d) => {
-      if (d.depth > 1 && d._children) {
-        d.children = d.children ? null : d._children;
-        update(d);
+      if (d.depth > 1) {
+        if (d.children) {
+          d._children = d.children;
+          d.children = null;
+        } else {
+          d.children = d._children;
+        }
+        tree(root); // Recalculer l’arbre
+        update(d);  // Relancer le rendu
       }
     });
+
 
   node.append("circle")
     .attr("r", 5)

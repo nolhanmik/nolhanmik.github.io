@@ -79,11 +79,9 @@ function chart() {
   const nodes = root.descendants();
   const links = root.links();
 
-  // Clear previous render
   g.selectAll(".link").remove();
   g.selectAll(".node").remove();
 
-  // LINKS
   g.selectAll(".link")
     .data(links)
     .enter().append("path")
@@ -93,7 +91,6 @@ function chart() {
     .attr("stroke-width", 1.5)
     .attr("d", diagonal);
 
-  // NODES
   const node = g.selectAll(".node")
     .data(nodes)
     .enter().append("g")
@@ -105,7 +102,7 @@ function chart() {
     .on("click", (event, d) => {
       if (d.depth > 1 && d._children) {
         d.children = d.children ? null : d._children;
-        update(d); // relance le graphique avec les nouvelles données
+        update(d);
       }
     });
 
@@ -122,6 +119,7 @@ function chart() {
     .style("font-weight", d => d.depth <= 1 ? "bold" : "normal")
     .style("font-size", d => d.depth === 0 ? "16px" : "12px");
 }
+
  
 
   update(root);

@@ -1,3 +1,5 @@
+// chart.js
+
 const data = {
   name: "LE REFERENTIEL DD&RS",
   children: [
@@ -48,97 +50,135 @@ const data = {
 };
 
 function chart() {
-  const radius = Math.min(window.innerWidth, window.innerHeight) / 2 - 100;
+  // 1. Dimensions et échelle
+  const width = window.innerWidth * 2;
+  const height = window.innerHeight * 2;
+  const radius = Math.min(width, height) / 2 - 100;
   const tree = d3.tree().size([2 * Math.PI, radius]);
+
+  // 2. Préparation de la hiérarchie
   const root = d3.hierarchy(data);
-  root.x0 = Math.PI;
-  root.y0 = 0;
-  root.descendants().forEach((d, i) => {
-    d.id = i;
-    d._children = d.children;
-    if (d.depth > 1) d.children = null; // Seuls les niveaux > 1 sont repliables
+  let i = 0;
+  root.descendants().forEach(d => {
+    d.id = i++;
+    // On stocke les enfants dans _children, mais on replie tout à depth > 1
+    if (d.depth > 1) {
+      d._children = d.children;
+      d.children = null;
+    } else {
+      d._children = null;
+    }
   });
 
-  tree(root);
-
+  // 3. Création du SVG + groupe centré
   const svg = d3.create("svg")
-    .attr("width", window.innerWidth * 2)
-    .attr("height", window.innerHeight * 2)
-    .attr("style", "font: 12px sans-serif; user-select: none;");
+    .attr("width", width)
+    .attr("height", height)
+    .style("font", "12px sans-serif")
+    .style("user-select", "none");
 
   const g = svg.append("g")
-    .attr("transform", `translate(${window.innerWidth / 2},${window.innerHeight / 2})`);
+    .attr("transform", `translate(${width/2},${height/2})`);
 
+  // Groupes séparés pour nœuds et liens
+  const gLink = g.append("g").attr("class", "links");
+  const gNode = g.append("g").attr("class", "nodes");
+
+  // Projection radiale
   const diagonal = d3.linkRadial()
     .angle(d => d.x)
     .radius(d => d.y);
 
+  // 4. Fonction de mise à jour
   function update(source) {
-  tree(root); // recalculer la mise en page
+    // recalcul du tree
+    tree(root);
 
-  const nodes = root.descendants();
-  const links = root.links();
+    // Récupération des tableaux
+    const nodes = root.descendants();
+    const links = root.links();
 
-  g.selectAll(".link").remove();
-  g.selectAll(".node").remove();
+    // ----- LIENS -----
+    const link = gLink.selectAll("path.link")
+      .data(links, d => d.target.id);
 
-  g.selectAll(".link")
-    .data(links)
-    .enter().append("path")
-    .attr("class", "link")
-    .attr("fill", "none")
-    .attr("stroke", "#999")
-    .attr("stroke-width", 1.5)
-    .attr("d", diagonal);
+    // enter
+    link.enter().append("path")
+      .attr("class", "link")
+      .attr("fill", "none")
+      .attr("stroke", "#999")
+      .attr("stroke-width", 1.5)
+      .attr("d", diagonal);
 
-  const node = g.selectAll(".node")
-    .data(nodes)
-    .enter().append("g")
-    .attr("class", "node")
-    .attr("transform", d => `
-      rotate(${(d.x * 180 / Math.PI - 90)})
-      translate(${d.y},0)
-    `)
-    .on("click", (event, d) => {
-      if (d.depth > 1) {
-        if (d.children) {
-          d._children = d.children;
-          d.children = null;
-        } else {
-          d.children = d._children;
+    // update (rien à faire si tout est recalculé statiquement)
+
+    // exit
+    link.exit().remove();
+
+    // ----- NOEUDS -----
+    const node = gNode.selectAll("g.node")
+      .data(nodes, d => d.id);
+
+    // enter
+    const nodeEnter = node.enter().append("g")
+      .attr("class", "node")
+      .attr("transform", d => `
+        rotate(${(d.x * 180 / Math.PI - 90)})
+        translate(${d.y},0)
+      `)
+      .style("cursor", d => d.depth > 1 ? "pointer" : "default")
+      .on("click", (event, d) => {
+        if (d.depth > 1 && d._children) {
+          // bascule children <-> _children
+          if (d.children) {
+            d._children = d.children;
+            d.children = null;
+          } else {
+            d.children = d._children;
+          }
+          update(d);
         }
-        tree(root); // Recalculer l’arbre
-        update(d);  // Relancer le rendu
-      }
-    });
+      });
 
+    nodeEnter.append("circle")
+      .attr("r", 5)
+      .attr("fill", d => {
+        if (d.depth === 0) return "#2c3e50";    // central
+        if (d.depth === 1) return "#0074D9";    // axes
+        return d.children ? "#28a745" : "#ff7f0e"; // ouverts vs fermés
+      })
+      .attr("stroke", "#333");
 
-  node.append("circle")
-    .attr("r", 5)
-    .attr("fill", d => d.depth === 0 ? "#2c3e50" : d.depth === 1 ? "#0074D9" : "#28a745");
+    nodeEnter.append("text")
+      .attr("dy", "0.31em")
+      .attr("x", d => d.x < Math.PI ? 6 : -6)
+      .attr("text-anchor", d => d.x < Math.PI ? "start" : "end")
+      .attr("transform", d => d.x >= Math.PI ? "rotate(180)" : null)
+      .text(d => d.data.name)
+      .style("font-weight", d => d.depth <= 1 ? "bold" : "normal")
+      .style("font-size", d => d.depth === 0 ? "16px" : "12px")
+      .style("fill", d => d.depth === 0 ? "#000" : "#333");
 
-  node.append("text")
-    .attr("dy", "0.31em")
-    .attr("x", d => d.x < Math.PI ? 6 : -6)
-    .attr("text-anchor", d => d.x < Math.PI ? "start" : "end")
-    .attr("transform", d => d.x >= Math.PI ? "rotate(180)" : null)
-    .text(d => d.data.name)
-    .style("font-weight", d => d.depth <= 1 ? "bold" : "normal")
-    .style("font-size", d => d.depth === 0 ? "16px" : "12px");
-}
+    // update
+    node.merge(nodeEnter).transition().duration(300)
+      .attr("transform", d => `
+        rotate(${(d.x * 180 / Math.PI - 90)})
+        translate(${d.y},0)
+      `);
 
- 
+    // exit
+    node.exit().remove();
+  }
 
+  // 5. Premier rendu
   update(root);
 
   return svg.node();
 }
 
+// Injection et responsive
 document.getElementById("chart").appendChild(chart());
-
 window.addEventListener("resize", () => {
   document.getElementById("chart").innerHTML = "";
-  requestAnimationFrame(() => {
-    document.getElementById("chart").appendChild(chart());
-  });
+  document.getElementById("chart").appendChild(chart());
 });

@@ -74,50 +74,55 @@ function chart() {
     .radius(d => d.y);
 
   function update(source) {
-    const nodes = root.descendants();
-    const links = root.links();
+  tree(root); // recalculer la mise en page
 
-    const node = g.selectAll("g.node")
-      .data(nodes, d => d.id);
+  const nodes = root.descendants();
+  const links = root.links();
 
-    const nodeEnter = node.enter().append("g")
-      .attr("class", "node")
-      .attr("transform", d => `
-        rotate(${(d.x * 180 / Math.PI - 90)})
-        translate(${d.y},0)
-      `)
-      .on("click", (event, d) => {
-        if (d.depth > 1) {
-          d.children = d.children ? null : d._children;
-          g.selectAll("*").remove(); // Nettoie l'ancien affichage
-          tree(root);
-          update(d);
-        }
-      });
+  // Clear previous render
+  g.selectAll(".link").remove();
+  g.selectAll(".node").remove();
 
-    nodeEnter.append("circle")
-      .attr("r", 5)
-      .attr("fill", d => d.depth === 0 ? "#2c3e50" : d.depth === 1 ? "#0074D9" : "#28a745");
+  // LINKS
+  g.selectAll(".link")
+    .data(links)
+    .enter().append("path")
+    .attr("class", "link")
+    .attr("fill", "none")
+    .attr("stroke", "#999")
+    .attr("stroke-width", 1.5)
+    .attr("d", diagonal);
 
-    nodeEnter.append("text")
-      .attr("dy", "0.31em")
-      .attr("x", d => d.x < Math.PI ? 6 : -6)
-      .attr("text-anchor", d => d.x < Math.PI ? "start" : "end")
-      .attr("transform", d => d.x >= Math.PI ? "rotate(180)" : null)
-      .text(d => d.data.name)
-      .style("font-weight", d => d.depth <= 1 ? "bold" : "normal")
-      .style("font-size", d => d.depth === 0 ? "16px" : "12px");
+  // NODES
+  const node = g.selectAll(".node")
+    .data(nodes)
+    .enter().append("g")
+    .attr("class", "node")
+    .attr("transform", d => `
+      rotate(${(d.x * 180 / Math.PI - 90)})
+      translate(${d.y},0)
+    `)
+    .on("click", (event, d) => {
+      if (d.depth > 1 && d._children) {
+        d.children = d.children ? null : d._children;
+        update(d); // relance le graphique avec les nouvelles données
+      }
+    });
 
-    const link = g.selectAll("path.link")
-      .data(links, d => d.target.id);
+  node.append("circle")
+    .attr("r", 5)
+    .attr("fill", d => d.depth === 0 ? "#2c3e50" : d.depth === 1 ? "#0074D9" : "#28a745");
 
-    link.enter().append("path")
-      .attr("class", "link")
-      .attr("fill", "none")
-      .attr("stroke", "#999")
-      .attr("stroke-width", 1.5)
-      .attr("d", diagonal);
-  }
+  node.append("text")
+    .attr("dy", "0.31em")
+    .attr("x", d => d.x < Math.PI ? 6 : -6)
+    .attr("text-anchor", d => d.x < Math.PI ? "start" : "end")
+    .attr("transform", d => d.x >= Math.PI ? "rotate(180)" : null)
+    .text(d => d.data.name)
+    .style("font-weight", d => d.depth <= 1 ? "bold" : "normal")
+    .style("font-size", d => d.depth === 0 ? "16px" : "12px");
+}
+ 
 
   update(root);
 

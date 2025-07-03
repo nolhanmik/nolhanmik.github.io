@@ -138,5 +138,7 @@ document.getElementById("chart").appendChild(chart());
 
 window.addEventListener("resize", () => {
   document.getElementById("chart").innerHTML = "";
-  document.getElementById("chart").appendChild(chart());
+  requestAnimationFrame(() => {
+    document.getElementById("chart").appendChild(chart());
+  });
 });

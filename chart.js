@@ -5,15 +5,30 @@ const data = {
   name: "LE REFERENTIEL DD&RS",
   children: [
     { 
-      name: "1. Stratégie & Gouvernance"
+      name: "1. Stratégie & Gouvernance",
       children: [
         { name: "1.1 Formaliser sa politique DD&RS, l'intégrer à toute l'activité de l'établissement" },
         { name: "1.2 Déployer des ressources et piloter la stratégie DD&RS" },
         { name: "1.3 Contribuer à la construction d'une société responsable"} 
       ]
     },
-    { name: "2. Enseignement & Formation" },
-    { name: "3. Recherche & Innovation" },
+    { 
+      name: "2. Enseignement & Formation",
+      children : [
+        { name: "2.1 Intégrer le DD&RS dans les enseignements" },
+        { name: "2.2 Développer les compétences DD&RS des apprenant.e.s" },
+        { name: "2.3 Former et soutenir les enseignant.es au DD&RS" },
+        { name: "2.4 Favoriser le développement d'une société de la connaissance respectueuse du DD&RS"} 
+      ]
+    },
+    { 
+      name: "3. Recherche & Innovation",
+      children : [
+        { name: "3.1 Intégrer le DD&RS dans la stratégie R&I" },
+        { name: "3.2 Développer les interactions science/société" },
+        { name: "3.3 Promouvoir un dispositif de réflexion éthique responsabilité de la R&I"} 
+      ]
+    },
     { name: "4. Gestion environnementale" },
     {
       name: "Branche B",

@@ -51,10 +51,10 @@ const data = {
 };
 
 function chart() {
-  const width = 600;
+  /*const width = 600;
   const dx = 60;
   const dy = 160;
-  const margin = { top: 10, right: 120, bottom: 10, left: 40 };
+  const margin = { top: 10, right: 120, bottom: 10, left: 40 };*/
 
   const root = d3.hierarchy(data);
   root.x0 = 0;

@@ -51,10 +51,10 @@ const data = {
 };
 
 function chart() {
-  /*const width = 600;
-  const dx = 60;
-  const dy = 160;
-  const margin = { top: 10, right: 120, bottom: 10, left: 40 };*/
+  const width = window.innerWidth;
+  const dx = window.innerHeight / 20; // Hauteur entre les nœuds
+  const dy = width / 6;
+  const margin = { top: 10, right: 120, bottom: 10, left: 40 };
 
   const root = d3.hierarchy(data);
   root.x0 = 0;
@@ -66,11 +66,12 @@ function chart() {
     .x(d => d.y)
     .y(d => d.x);
 
-  const svg = d3.create("svg")
-    .attr("viewBox", [0, -dx, width, dx])
-    .attr("width", width)
-    .attr("height", dx)
+  svg = d3.create("svg")
+    .attr("width", window.innerWidth)
+    .attr("height", window.innerHeight)
+    .attr("viewBox", [0, -dx, window.innerWidth, window.innerHeight])
     .attr("style", "font: 12px sans-serif; user-select: none;");
+
 
   const gLink = svg.append("g")
     .attr("fill", "none")

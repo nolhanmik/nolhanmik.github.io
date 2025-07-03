@@ -178,4 +178,11 @@ function chart() {
 }
 
 document.getElementById("chart").appendChild(chart());
+window.addEventListener("resize", () => {
+  // Supprime le graphique existant
+  document.getElementById("chart").innerHTML = "";
+  // Recrée le graphique avec les nouvelles dimensions
+  document.getElementById("chart").appendChild(chart());
+});
+
 

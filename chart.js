@@ -52,9 +52,10 @@ const data = {
 
 function chart() {
   const width = window.innerWidth;
-  const dx = window.innerHeight / 20; // Hauteur entre les nœuds
+  const height = window.innerHeight;
+  const dx = height / 20;
   const dy = width / 6;
-  const margin = { top: 10, right: 120, bottom: 10, left: 40 };
+  const centerX = width / 2;
 
   const root = d3.hierarchy(data);
   root.x0 = 0;
@@ -179,10 +180,14 @@ function chart() {
 
 document.getElementById("chart").appendChild(chart());
 window.addEventListener("resize", () => {
-  // Supprime le graphique existant
+  // Supprime l'ancien graphique
   document.getElementById("chart").innerHTML = "";
-  // Recrée le graphique avec les nouvelles dimensions
-  document.getElementById("chart").appendChild(chart());
+
+  // Recrée le nouveau graphique avec dimensions mises à jour
+  requestAnimationFrame(() => {
+    document.getElementById("chart").appendChild(chart());
+  });
 });
+
 
 

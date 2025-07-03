@@ -1,193 +1,106 @@
-// Exemple de données hiérarchiques
-
-
 const data = {
   name: "LE REFERENTIEL DD&RS",
   children: [
-    { 
+    {
       name: "1. Stratégie & Gouvernance",
       children: [
-        { name: "1.1 Formaliser sa politique DD&RS, l'intégrer à toute l'activité de l'établissement" },
-        { name: "1.2 Déployer des ressources et piloter la stratégie DD&RS" },
-        { name: "1.3 Contribuer à la construction d'une société responsable"} 
-      ]
-    },
-    { 
-      name: "2. Enseignement & Formation",
-      children : [
-        { name: "2.1 Intégrer le DD&RS dans les enseignements" },
-        { name: "2.2 Développer les compétences DD&RS des apprenant.e.s" },
-        { name: "2.3 Former et soutenir les enseignant.es au DD&RS" },
-        { name: "2.4 Favoriser le développement d'une société de la connaissance respectueuse du DD&RS"} 
-      ]
-    },
-    { 
-      name: "3. Recherche & Innovation",
-      children : [
-        { name: "3.1 Intégrer le DD&RS dans la stratégie R&I" },
-        { name: "3.2 Développer les interactions science/société" },
-        { name: "3.3 Promouvoir un dispositif de réflexion éthique responsabilité de la R&I"} 
-      ]
-    },
-    { 
-      name: "4. Gestion environnementale", 
-      children : [
-        { name: "4.1 Diminuer les émissions de gaz à effet de serre, utilisation durable des ressources" },
-        { name: "4.2 Prévenir et réduire les atteintes à l'environnement (pollution)" },
-        { name: "4.3 Préserver la biodiversité" },
-        { name: "4.4 Promouvoir une alimentation responsable"} 
+        { name: "1.1 Formaliser sa politique DD&RS" },
+        { name: "1.2 Déployer des ressources" },
+        { name: "1.3 Société responsable" }
       ]
     },
     {
-      name: "5.Politique sociale",
+      name: "2. Enseignement & Formation",
       children: [
-        { name: "5.1 Egalité et diversité au sein des personnels" },
-        { name: "5.2 Accompagner le développement des compétences, dont le DD&RS" },
+        { name: "2.1 Intégrer le DD&RS" },
+        { name: "2.2 Développer les compétences" },
+        { name: "2.3 Soutenir les enseignant.es" },
+        { name: "2.4 Société de la connaissance" }
+      ]
+    },
+    {
+      name: "3. Recherche & Innovation",
+      children: [
+        { name: "3.1 Stratégie R&I" },
+        { name: "3.2 Science/société" },
+        { name: "3.3 Réflexion éthique" }
+      ]
+    },
+    {
+      name: "4. Gestion environnementale",
+      children: [
+        { name: "4.1 Émissions & ressources" },
+        { name: "4.2 Pollution" },
+        { name: "4.3 Biodiversité" },
+        { name: "4.4 Alimentation responsable" }
+      ]
+    },
+    {
+      name: "5. Politique sociale",
+      children: [
+        { name: "5.1 Égalité & diversité" },
+        { name: "5.2 Compétences DD&RS" },
         { name: "5.3 Qualité de vie" },
-        { name: "5.4 Egalité des chances pour les apprenants"}
+        { name: "5.4 Égalité des chances" }
       ]
     }
   ]
 };
 
 function chart() {
-  const width = window.innerWidth;
-  const height = window.innerHeight;
-  const dx = height / 20;
-  const dy = width / 6;
-  const centerX = width / 2;
+  const radius = Math.min(window.innerWidth, window.innerHeight) / 2 - 100;
+  const tree = d3.cluster().size([2 * Math.PI, radius]);
 
   const root = d3.hierarchy(data);
-  root.x0 = 0;
-  root.y0 = 0;
+  tree(root);
 
-  const tree = d3.tree().nodeSize([dx, dy]);
-  svg = d3.create("svg")
+  const svg = d3.create("svg")
     .attr("width", window.innerWidth)
     .attr("height", window.innerHeight)
-    .attr("viewBox", [0, -dx, window.innerWidth, window.innerHeight])
-    .attr("style", "font: 12px sans-serif; user-select: none;");
+    .attr("viewBox", [0, 0, window.innerWidth, window.innerHeight])
+    .attr("style", "font: 10px sans-serif; user-select: none;");
 
+  const g = svg.append("g")
+    .attr("transform", `translate(${window.innerWidth / 2},${window.innerHeight / 2})`);
 
-  const gLink = svg.append("g")
+  const link = g.append("g")
     .attr("fill", "none")
-    .attr("stroke", "#555")
-    .attr("stroke-opacity", 0.4)
-    .attr("stroke-width", 1.5);
-
-  const gNode = svg.append("g")
-    .attr("cursor", "pointer")
-    .attr("pointer-events", "all");
-
-  function update(source) {
-    const nodes = root.descendants().reverse();
-    const links = root.links();
-
-    tree(root);
-    const centerX = window.innerWidth / 2;
-
-    const diagonal = d3.linkVertical()
-    .x(d => d.y + centerX - root.y)
-    .y(d => d.x);
-
-    let x0 = Infinity, x1 = -Infinity;
-    root.each(d => {
-      if (d.x > x1) x1 = d.x;
-      if (d.x < x0) x0 = d.x;
+    .attr("stroke", "#999")
+    .attr("stroke-opacity", 0.6)
+    .attr("stroke-width", 1.5)
+    .selectAll("path")
+    .data(root.links())
+    .join("path")
+    .attr("d", d => {
+      return d3.linkRadial()
+        .angle(d => d.x)
+        .radius(d => d.y)({
+          source: d.source,
+          target: d.target
+        });
     });
 
-    const height = x1 - x0 + margin.top + margin.bottom;
+  const node = g.append("g")
+    .selectAll("g")
+    .data(root.descendants())
+    .join("g")
+    .attr("transform", d => `rotate(${(d.x * 180 / Math.PI - 90)}) translate(${d.y},0)`);
 
-    svg.transition()
-      .duration(500)
-      .attr("height", height)
-      .attr("viewBox", [0, x0 - margin.top, width, height]);
+  node.append("circle")
+    .attr("r", 5)
+    .attr("fill", "#28a745");
 
-    const node = gNode.selectAll("g")
-      .data(nodes, d => d.id || (d.id = ++i));
-
-    const nodeEnter = node.enter().append("g")
-      .attr("transform", d => `translate(${source.y0 + centerX - root.y},${source.x0})`)
-      .on("click", (event, d) => {
-        d.children = d.children ? null : d._children;
-        update(d);
-      });
-
-    nodeEnter.append("circle")
-      .attr("r", 6)
-      .attr("fill", d => d._children ? "#6c757d" : "#28a745")
-      .attr("stroke", "#333");
-
-    nodeEnter.append("text")
-      .attr("dy", "0.35em")
-      .attr("x", d => d._children ? -10 : 10)
-      .attr("text-anchor", d => d._children ? "end" : "start")
-      .text(d => d.data.name)
-      .style("font-weight", d => d.depth === 0 || d.depth === 1 ? "bold" : "normal")
-      .style("font-size", d => d.depth === 0 ? "16px" : "12px")
-      .style("fill", d => {
-        if (d.depth === 0) return "#000000"; // Racine en noir
-        if (d.depth === 1) {
-          const index = d.parent ? d.parent.children.indexOf(d) : 0;
-          const colors = ["#0074D9", "#FF4136", "#2ECC40", "#FF851B", "#B10DC9"];
-          return colors[index % colors.length];
-        }
-        return "#333";
-      });
-
-
-    const nodeMerge = nodeEnter.merge(node);
-    nodeMerge.transition().duration(500)
-      .attr("transform", d => `translate(${d.y + centerX - root.y},${d.x})`);
-    
-    node.exit().transition().duration(500).remove()
-      .attr("transform", d => `translate(${source.y},${source.x})`);
-
-    const link = gLink.selectAll("path")
-      .data(links, d => d.target.id);
-
-    const linkEnter = link.enter().append("path")
-      .attr("d", d => {
-        const o = { x: source.x0, y: source.y0 };
-        return diagonal({ source: o, target: o });
-      });
-
-    linkEnter.merge(link).transition().duration(500)
-      .attr("d", diagonal);
-
-    link.exit().transition().duration(500).remove()
-      .attr("d", d => {
-        const o = { x: source.x, y: source.y };
-        return diagonal({ source: o, target: o });
-      });
-
-    root.eachBefore(d => {
-      d.x0 = d.x;
-      d.y0 = d.y;
-    });
-  }
-
-  root.eachBefore(d => {
-    d._children = d.children;
-    if (d.depth && d.data.name.length !== 7) d.children = null;
-  });
-
-  let i = 0;
-  update(root);
+  node.append("text")
+    .attr("dy", "0.31em")
+    .attr("x", d => d.x < Math.PI ? 6 : -6)
+    .attr("text-anchor", d => d.x < Math.PI ? "start" : "end")
+    .attr("transform", d => d.x >= Math.PI ? "rotate(180)" : null)
+    .text(d => d.data.name)
+    .style("fill", d => d.depth === 0 ? "#000" : "#333")
+    .style("font-weight", d => d.depth === 0 || d.depth === 1 ? "bold" : "normal")
+    .style("font-size", d => d.depth === 0 ? "16px" : "12px");
 
   return svg.node();
 }
 
 document.getElementById("chart").appendChild(chart());
-window.addEventListener("resize", () => {
-  // Supprime l'ancien graphique
-  document.getElementById("chart").innerHTML = "";
-
-  // Recrée le nouveau graphique avec dimensions mises à jour
-  requestAnimationFrame(() => {
-    document.getElementById("chart").appendChild(chart());
-  });
-});
-
-
-

@@ -62,8 +62,8 @@ function chart() {
   tree(root);
 
   const svg = d3.create("svg")
-    .attr("width", window.innerWidth)
-    .attr("height", window.innerHeight)
+    .attr("width", window.innerWidth * 2)
+    .attr("height", window.innerHeight * 2)
     .attr("style", "font: 12px sans-serif; user-select: none;");
 
   const g = svg.append("g")

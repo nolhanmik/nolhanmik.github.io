@@ -120,7 +120,19 @@ function chart() {
       .attr("dy", "0.35em")
       .attr("x", d => d._children ? -10 : 10)
       .attr("text-anchor", d => d._children ? "end" : "start")
-      .text(d => d.data.name);
+      .text(d => d.data.name)
+      .style("font-weight", d => d.depth === 0 || d.depth === 1 ? "bold" : "normal")
+      .style("font-size", d => d.depth === 0 ? "16px" : "12px")
+      .style("fill", d => {
+        if (d.depth === 0) return "#000000"; // Racine en noir
+        if (d.depth === 1) {
+          const index = d.parent ? d.parent.children.indexOf(d) : 0;
+          const colors = ["#0074D9", "#FF4136", "#2ECC40", "#FF851B", "#B10DC9"];
+          return colors[index % colors.length];
+        }
+        return "#333";
+      });
+
 
     const nodeMerge = nodeEnter.merge(node);
     nodeMerge.transition().duration(500)

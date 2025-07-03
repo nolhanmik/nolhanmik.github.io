@@ -29,12 +29,22 @@ const data = {
         { name: "3.3 Promouvoir un dispositif de réflexion éthique responsabilité de la R&I"} 
       ]
     },
-    { name: "4. Gestion environnementale" },
+    { 
+      name: "4. Gestion environnementale", 
+      children : [
+        { name: "4.1 Diminuer les émissions de gaz à effet de serre, utilisation durable des ressources" },
+        { name: "4.2 Prévenir et réduire les atteintes à l'environnement (pollution)" },
+        { name: "4.3 Préserver la biodiversité" },
+        { name: "4.4 Promouvoir une alimentation responsable"} 
+      ]
+    },
     {
-      name: "Branche B",
+      name: "5.Politique sociale",
       children: [
-        { name: "Feuille 1" },
-        { name: "Feuille 2" }
+        { name: "5.1 Egalité et diversité au sein des personnels" },
+        { name: "5.2 Accompagner le développement des compétences, dont le DD&RS" },
+        { name: "5.3 Qualité de vie" },
+        { name: "5.4 Egalité des chances pour les apprenants"}
       ]
     }
   ]

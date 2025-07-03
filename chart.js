@@ -50,135 +50,126 @@ const data = {
 };
 
 function chart() {
-  // 1. Dimensions et échelle
-  const width = window.innerWidth * 2;
-  const height = window.innerHeight * 2;
-  const radius = Math.min(width, height) / 2 - 100;
+  // 1. dimensions
+  const W = window.innerWidth * 2;
+  const H = window.innerHeight * 2;
+  const radius = Math.min(W, H) / 2 - 100;
   const tree = d3.tree().size([2 * Math.PI, radius]);
 
-  // 2. Préparation de la hiérarchie
+  // 2. hiérarchie + collapse initial
   const root = d3.hierarchy(data);
-  let i = 0;
-  root.descendants().forEach(d => {
-    d.id = i++;
-    // On stocke les enfants dans _children, mais on replie tout à depth > 1
-    if (d.depth > 1) {
+  let counter = 0;
+  root.each(d => {
+    d.id = counter++;
+    // pour depth ≥ 1 (les axes), on replie leurs enfants
+    if (d.depth >= 1 && d.children) {
       d._children = d.children;
       d.children = null;
-    } else {
-      d._children = null;
     }
   });
 
-  // 3. Création du SVG + groupe centré
+  // 3. SVG
   const svg = d3.create("svg")
-    .attr("width", width)
-    .attr("height", height)
+    .attr("width", W)
+    .attr("height", H)
     .style("font", "12px sans-serif")
     .style("user-select", "none");
 
   const g = svg.append("g")
-    .attr("transform", `translate(${width/2},${height/2})`);
+    .attr("transform", `translate(${W/2},${H/2})`);
 
-  // Groupes séparés pour nœuds et liens
   const gLink = g.append("g").attr("class", "links");
   const gNode = g.append("g").attr("class", "nodes");
 
-  // Projection radiale
   const diagonal = d3.linkRadial()
     .angle(d => d.x)
     .radius(d => d.y);
 
-  // 4. Fonction de mise à jour
-  function update(source) {
-    // recalcul du tree
+  // 4. update function
+  function update() {
     tree(root);
 
-    // Récupération des tableaux
-    const nodes = root.descendants();
     const links = root.links();
+    const nodes = root.descendants();
 
-    // ----- LIENS -----
+    // --- Liens ---
     const link = gLink.selectAll("path.link")
       .data(links, d => d.target.id);
 
-    // enter
-    link.enter().append("path")
-      .attr("class", "link")
-      .attr("fill", "none")
-      .attr("stroke", "#999")
-      .attr("stroke-width", 1.5)
-      .attr("d", diagonal);
+    link.join(
+      enter => enter.append("path")
+        .attr("class", "link")
+        .attr("fill", "none")
+        .attr("stroke", "#999")
+        .attr("stroke-width", 1.5)
+        .attr("d", diagonal),
+      update => update.attr("d", diagonal),
+      exit => exit.remove()
+    );
 
-    // update (rien à faire si tout est recalculé statiquement)
-
-    // exit
-    link.exit().remove();
-
-    // ----- NOEUDS -----
+    // --- Nœuds ---
     const node = gNode.selectAll("g.node")
       .data(nodes, d => d.id);
 
-    // enter
-    const nodeEnter = node.enter().append("g")
-      .attr("class", "node")
-      .attr("transform", d => `
-        rotate(${(d.x * 180 / Math.PI - 90)})
-        translate(${d.y},0)
-      `)
-      .style("cursor", d => d.depth > 1 ? "pointer" : "default")
-      .on("click", (event, d) => {
-        if (d.depth > 1 && d._children) {
-          // bascule children <-> _children
-          if (d.children) {
-            d._children = d.children;
-            d.children = null;
-          } else {
-            d.children = d._children;
-          }
-          update(d);
-        }
-      });
+    const nodeEnter = node.join(
+      enter => {
+        const ng = enter.append("g")
+          .attr("class", "node")
+          .attr("transform", d => `
+            rotate(${(d.x * 180/Math.PI - 90)})
+            translate(${d.y},0)
+          `)
+          .style("cursor", d => d._children ? "pointer" : "default")
+          .on("click", (event, d) => {
+            if (!d._children) return;
+            // swap children <-> _children
+            if (d.children) {
+              d._children = d.children;
+              d.children = null;
+            } else {
+              d.children = d._children;
+            }
+            update();
+          });
 
-    nodeEnter.append("circle")
-      .attr("r", 5)
-      .attr("fill", d => {
-        if (d.depth === 0) return "#2c3e50";    // central
-        if (d.depth === 1) return "#0074D9";    // axes
-        return d.children ? "#28a745" : "#ff7f0e"; // ouverts vs fermés
-      })
-      .attr("stroke", "#333");
+        ng.append("circle")
+          .attr("r", 5)
+          .attr("fill", d => {
+            if (d.depth === 0) return "#2c3e50";
+            if (d.depth === 1) return "#0074D9";
+            return d.children ? "#28a745" : "#ff7f0e";
+          })
+          .attr("stroke", "#333");
 
-    nodeEnter.append("text")
-      .attr("dy", "0.31em")
-      .attr("x", d => d.x < Math.PI ? 6 : -6)
-      .attr("text-anchor", d => d.x < Math.PI ? "start" : "end")
-      .attr("transform", d => d.x >= Math.PI ? "rotate(180)" : null)
-      .text(d => d.data.name)
-      .style("font-weight", d => d.depth <= 1 ? "bold" : "normal")
-      .style("font-size", d => d.depth === 0 ? "16px" : "12px")
-      .style("fill", d => d.depth === 0 ? "#000" : "#333");
+        ng.append("text")
+          .attr("dy", "0.31em")
+          .attr("x", d => d.x < Math.PI ? 6 : -6)
+          .attr("text-anchor", d => d.x < Math.PI ? "start" : "end")
+          .attr("transform", d => d.x >= Math.PI ? "rotate(180)" : null)
+          .text(d => d.data.name)
+          .style("font-weight", d => d.depth <= 1 ? "bold" : "normal")
+          .style("font-size", d => d.depth === 0 ? "16px" : "12px")
+          .style("fill", d => d.depth === 0 ? "#000" : "#333");
 
-    // update
-    node.merge(nodeEnter).transition().duration(300)
-      .attr("transform", d => `
-        rotate(${(d.x * 180 / Math.PI - 90)})
-        translate(${d.y},0)
-      `);
-
-    // exit
-    node.exit().remove();
+        return ng;
+      },
+      update => update.transition().duration(300)
+        .attr("transform", d => `
+          rotate(${(d.x * 180/Math.PI - 90)})
+          translate(${d.y},0)
+        `),
+      exit => exit.remove()
+    );
   }
 
-  // 5. Premier rendu
-  update(root);
-
+  update();
   return svg.node();
 }
 
-// Injection et responsive
-document.getElementById("chart").appendChild(chart());
+// injection + resize
+const container = document.getElementById("chart");
+container.appendChild(chart());
 window.addEventListener("resize", () => {
-  document.getElementById("chart").innerHTML = "";
-  document.getElementById("chart").appendChild(chart());
+  container.innerHTML = "";
+  container.appendChild(chart());
 });

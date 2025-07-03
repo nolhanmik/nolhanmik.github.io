@@ -1,4 +1,12 @@
 chart = {
+  
+  const data = {
+  name: "Racine",
+  children: [
+    { name: "Branche 1" },
+    { name: "Branche 2", children: [{ name: "Feuille" }] }
+  ]
+  };
 
   // Specify the charts’ dimensions. The height is variable, depending on the layout.
   const width = 928;

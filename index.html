@@ -141,7 +141,44 @@
         }
       ]
     };
-
+    
+    function wrap(text, width) {
+      text.each(function() {
+        const textEl     = d3.select(this);
+        const words      = textEl.text().split(/\s+/).reverse();
+        let word;
+        let line        = [];
+        let lineNumber  = 0;
+        const lineHeight= 1.1; // ems
+        const y         = textEl.attr("y") || 0;
+        const x         = textEl.attr("x") || 0;
+        const dy        = parseFloat(textEl.attr("dy")) || 0;
+        
+        let tspan = textEl
+          .text(null)
+          .append("tspan")
+            .attr("x", x)
+            .attr("y", y)
+            .attr("dy", dy + "em");
+        
+        while (word = words.pop()) {
+          line.push(word);
+          tspan.text(line.join(" "));
+          if (tspan.node().getComputedTextLength() > width) {
+            line.pop();
+            tspan.text(line.join(" "));
+            line = [word];
+            lineNumber++;
+            tspan = textEl.append("tspan")
+              .attr("x", x)
+              .attr("y", y)
+              .attr("dy", lineNumber * lineHeight + dy + "em")
+              .text(word);
+          }
+        }
+      });
+    }
+    
     function chart() {
       const W      = window.innerWidth;
       const H      = window.innerHeight;
@@ -246,6 +283,7 @@
                 .style("font-weight", d => d.depth <= 1 ? "bold" : "normal")
                 .style("font-size", d => d.depth === 0 ? "30px" : "15px")
                 .style("fill", d => d.color)
+                .call(wrap, 80)   // largeur max en pixel
                 .attr("dy", d => d.depth === 0 ? "-1.6em" : "0.31em")
                 .attr("text-anchor", d =>
                   d.depth === 0 ? "middle" :

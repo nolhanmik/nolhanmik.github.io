@@ -10,6 +10,10 @@
       height: 100%; overflow: auto;
       font-family: sans-serif;
     }
+    h1 {
+      margin: 1em 0 0.5em;
+      text-align: center;
+    }
     #chart {
       width: 100vw;
       height: calc(100vh - 3.5em);
@@ -34,31 +38,129 @@
     // Définition des couleurs
     const rootColor  = "#2c3e50";                   
     const axisColors = [
-      "#6a619c", "#e84e4e", "#dd945b",
-      "#7fb475", "#47c4e0"
+      "#6a619c", // Stratégie
+      "#e84e4e", // Enseignement
+      "#dd945b", // Recherche
+      "#7fb475", // Environnement
+      "#47c4e0"  // Sociale
     ];
     // —————————————
 
-    // Ton objet data…
-    const data = { /* … ta structure hiérarchique … */ };
-
-    // 1) Fonction wrap pour le retour à la ligne
+    const data = {
+      name: "LE REFERENTIEL DD&RS",
+      children: [
+        {
+          name: "1. Stratégie & Gouvernance",
+          children: [
+            { 
+              name: "1.1 Formaliser sa politique DD&RS",
+              children: [
+                {name: "1.1.1 Définir sa stratégie et élaborer un plan d'actions en couvrant toutes les dimensions"},
+                {name: "1.1.2 Intégrer la démarche à l'ensemble des services/directions de l'établissement et de ses activités fonctionnelles et opérationnelles"},
+                {name: "1.1.3 Mettre en place une politique d'achats responsables"},
+                {name: "1.1.4 Communiquer sur les objectifs, les pratiques et rendre compte des résultats de la démarche DD&RS auprès de toutes les parties prenantes"}
+              ]
+            },
+          
+            { 
+              name: "1.2 Déployer des ressources",
+              children: [
+                {name: "1.2.1 Affecter des moyens à la conduite du DD&RS"},
+                {name: "1.2.2 Evaluer, analyser la performance de la démarche DD&RS"}
+              ]
+            },
+            { 
+              name: "1.3 Société responsable",
+              children: [
+                {name: "1.3.1 Sensibiliser et susciter l'adhésion de toutes les parties prenantes internes de l'établissement dans une dynamique de pratiques durables"},
+                {name: "1.3.2 Agir avec des réseaux d'acteurs nationaux et internationaux pour contribuer à faire évoluer les comportements et partager ses performances durables pour co-construire une société responsable"},
+                {name: "1.3.3 S'engager sur ses territoires au travers de sa politique DD&RS"}              
+              ]
+            }
+          ]
+        },
+        {
+          name: "2. Enseignement & Formation",
+          children: [
+            { 
+              name: "2.1 Intégrer le DD&RS",
+              children: [
+                {name: "2.1.1 Adapter les enseignements des cursus traditionnels: intégration des problématiques de DD&RS dans les programmes de la formation initiale, y compris des programmes d'apprentissage et d'alternance" },
+                {name: "2.1.2 Intégrer le DD&RS dans les programmes de formation continue"}
+              ]
+            
+            },
+            { 
+              name: "2.2 Développer les compétences", 
+              children: [
+                {name: "2.2.1 Apprentissage à la mise en application des connaissances et compétences DD&RS dans tous les travaux et missions, y compris en entreprise" },
+                {name: "2.2.2 Accompagnement et reconnaissance des initiatives étudiantes (hors formation) dans la réalisation de projet DD&RS (apprenant.e.s en cursus normal (formation initiale) ou apprenant.e.s tout au long de leur vie (formation continue)"}
+              ]
+            },
+            { 
+              name: "2.3 Soutenir les enseignant.es", 
+              children: [
+                {name: "2.3.1 Incitation et soutien aux enseignant.e.s pour favoriser d'une part l'intégration du DD&RS d'autre part la transversalité des enseignements" },
+                {name: "2.3.2 Formation des futurs enseignant.e.s et/ou des doctorant.e.s aux enjeux et compétences DD&RS"}
+              ]
+            },
+            { 
+              name: "2.4 Société de la connaissance",
+              children: [
+                {name: "2.4.1 Développer et accompagner les démarches, méthodes et supports pédagogiques favorisant la diffusion et l'accès à la connaissance des parties prenantes" },
+                {name: "2.4.2 Ouvrir à l'international dans un objectif de co-développement (notamment avec les pays en développement) concernant les parties prenantes internes"}
+              ]
+            }
+          ]
+        },
+        {
+          name: "3. Recherche & Innovation",
+          children: [
+            { name: "3.1 Stratégie R&I" },
+            { name: "3.2 Science/société" },
+            { name: "3.3 Réflexion éthique" }
+          ]
+        },
+        {
+          name: "4. Gestion environnementale",
+          children: [
+            { name: "4.1 Émissions & ressources" },
+            { name: "4.2 Pollution" },
+            { name: "4.3 Biodiversité" },
+            { name: "4.4 Alimentation responsable" }
+          ]
+        },
+        {
+          name: "5. Politique sociale",
+          children: [
+            { name: "5.1 Égalité & diversité" },
+            { name: "5.2 Compétences DD&RS" },
+            { name: "5.3 Qualité de vie" },
+            { name: "5.4 Égalité des chances" }
+          ]
+        }
+      ]
+    };
+    
     function wrap(text, width) {
       text.each(function() {
-        const textEl    = d3.select(this);
-        const words     = textEl.text().split(/\s+/).reverse();
-        let   word, line = [], lineNum = 0;
-        const lineH     = 1.1;
-        const y         = +textEl.attr("y") || 0;
-        const x         = +textEl.attr("x") || 0;
+        const textEl     = d3.select(this);
+        const words      = textEl.text().split(/\s+/).reverse();
+        let word;
+        let line        = [];
+        let lineNumber  = 0;
+        const lineHeight= 1.1; // ems
+        const y         = textEl.attr("y") || 0;
+        const x         = textEl.attr("x") || 0;
         const dy        = parseFloat(textEl.attr("dy")) || 0;
-
-        let tspan = textEl.text(null)
+        
+        let tspan = textEl
+          .text(null)
           .append("tspan")
             .attr("x", x)
             .attr("y", y)
             .attr("dy", dy + "em");
-
+        
         while (word = words.pop()) {
           line.push(word);
           tspan.text(line.join(" "));
@@ -66,31 +168,31 @@
             line.pop();
             tspan.text(line.join(" "));
             line = [word];
-            lineNum++;
+            lineNumber++;
             tspan = textEl.append("tspan")
               .attr("x", x)
               .attr("y", y)
-              .attr("dy", (lineNum * lineH + dy) + "em")
+              .attr("dy", lineNumber * lineHeight + dy + "em")
               .text(word);
           }
         }
       });
     }
-
-    // 2) Plier tout le sous-arbre
+  // Recursion pour plier *tout* le sous‐arbre d'un nœud
     function collapseAll(d) {
       if (!d.children) return;
       d.children.forEach(collapseAll);
       d._children = d.children;
-      d.children  = null;
+      d.children = null;
     }
-
-    // 3) Appliquer les couleurs
+    
+    // Colorisation selon la profondeur et l’axe parent
     function applyColors(root) {
       root.color = rootColor;
       root.children.forEach((ax, i) => ax.color = axisColors[i]);
       root.each(d => {
         if (d.depth >= 2) {
+          // on trouve l’ancêtre de depth=1
           let anc = d;
           while (anc.depth > 1) anc = anc.parent;
           const factor = 0.7 + 0.3 * (d.depth - 1);
@@ -98,135 +200,122 @@
         }
       });
     }
+  
+  function chart() {
+  const tree = d3.tree().size([2*Math.PI, radius]);
+  const root = d3.hierarchy(data);
 
-    // 4) Génération de l'arbre radial
-    function chart() {
-      const W      = window.innerWidth;
-      const H      = window.innerHeight;
-      const radius = Math.min(W, H) / 2 - 80;
-      const tree   = d3.tree().size([2 * Math.PI, radius]);
-      const root   = d3.hierarchy(data);
+  // 1) id + backup original children
+  let id = 0;
+  root.each(d => {
+    d.id        = id++;
+    d._children = d.children || null;
+  });
 
-      // 4.1) id + sauvegarde des enfants
-      let id = 0;
-      root.each(d => {
-        d.id        = id++;
-        d._children = d.children;
-      });
+  // 2) AU CHARGEMENT : plier tous les nœuds de depth≥2  
+  root.each(d => {
+    if (d.depth >= 2 && d.children) collapseAll(d);
+  });
 
-      // 4.2) au démarrage, plier depth ≥ 2
-      root.each(d => {
-        if (d.depth >= 2 && d.children) collapseAll(d);
-      });
+  applyColors(root);
+  tree(root);
 
-      applyColors(root);
-      tree(root);
+  const svg   = /* création de ton svg centré */;
+  const nodeG = svg.append("g").attr("class","nodes");
+  const linkG = svg.append("g").attr("class","links");
+  const diagonal = d3.linkRadial().angle(d=>d.x).radius(d=>d.y);
 
-      // 4.3) création du SVG
-      const svg = d3.create("svg")
-        .attr("viewBox", [-W/2, -H/2, W, H])
-        .style("font", "12px sans-serif")
-        .style("user-select", "none");
+  function update() {
+    tree(root);
+    applyColors(root);
 
-      const g        = svg.append("g");
-      const linkG    = g.append("g").attr("class","links");
-      const nodeG    = g.append("g").attr("class","nodes");
-      const diagonal = d3.linkRadial().angle(d=>d.x).radius(d=>d.y);
+    // 1) liens
+    linkG.selectAll("path.link")
+      .data(root.links(), d=>d.target.id)
+      .join(
+        enter=>enter.append("path")
+          .attr("class","link")
+          .attr("d",diagonal)
+          .attr("stroke","#999")
+          .attr("fill","none"),
+        upd=>upd.transition().duration(300).attr("d",diagonal),
+        exit=>exit.remove()
+      );
 
-      // 4.4) fonction update
-      function update() {
-        tree(root);
-        applyColors(root);
+    // 2) nœuds
+    const nodes = nodeG.selectAll("g.node")
+      .data(root.descendants(), d=>d.id)
+      .join(
+        enter => {
+          const ng = enter.append("g")
+            .attr("class","node")
+            .attr("transform", d => {
+              const ang = d.x - Math.PI/2;
+              return `translate(${d.y*Math.cos(ang)},${d.y*Math.sin(ang)})`;
+            })
+            .style("cursor", d => d.depth === 1 && d._children ? "pointer" : "default")
+            .on("click", (e,d) => {
+              if (d.depth !== 1) return;
 
-        // liens
-        linkG.selectAll("path.link")
-          .data(root.links(), d=>d.target.id)
-          .join(
-            enter => enter.append("path")
-                          .attr("class","link")
-                          .attr("d", diagonal)
-                          .attr("stroke","#999")
-                          .attr("fill","none"),
-            upd   => upd.transition().duration(300).attr("d", diagonal),
-            exit  => exit.remove()
-          );
+              // fermer tous les autres axes ET leurs sous‐arbres
+              root.children.forEach(ax => {
+                if (ax !== d) collapseAll(ax);
+              });
 
-        // nœuds
-        nodeG.selectAll("g.node")
-          .data(root.descendants(), d=>d.id)
-          .join(
-            enter => {
-              const ng = enter.append("g")
-                .attr("class","node")
-                .attr("transform", d => {
-                  const ang = d.x - Math.PI/2;
-                  return `translate(${d.y*Math.cos(ang)},${d.y*Math.sin(ang)})`;
-                })
-                .style("cursor", d =>
-                  d.depth === 1 && d._children ? "pointer" : "default"
-                )
-                .on("click", (e,d) => {
-                  if (d.depth !== 1) return;
-                  // fermer tous les axes
-                  root.children.forEach(collapseAll);
-                  // basculer l’axe cliqué
-                  if (d._children) {
-                    d.children  = d._children;
-                    d._children = null;
-                  } else {
-                    collapseAll(d);
-                  }
-                  update();
-                });
+              // basculer *ce* seul axe
+              if (d.children) {
+                collapseAll(d);
+              } else {
+                d.children  = d._children;
+                d._children = null;
+              }
+              update();
+            });
 
-              // cercle
-              ng.append("circle")
-                .attr("r", d =>
-                  d.depth === 0 ? 14 :
-                  d.depth === 1 ? 10 : 6
-                )
-                .attr("fill", d=>d.color)
-                .attr("stroke","#333");
+          // cercle
+          ng.append("circle")
+            .attr("r", d => d.depth===0?14:d.depth===1?10:6)
+            .attr("fill", d=>d.color)
+            .attr("stroke","#333");
 
-              // texte + wrapping
-              ng.append("text")
-                .attr("x", d =>
-                  d.depth === 0 ? 0 :
-                  d.x < Math.PI ? 12 : -12
-                )
-                .attr("dy", d =>
-                  d.depth === 0 ? "-1.6em" : "0.31em"
-                )
-                .attr("text-anchor", d =>
-                  d.depth === 0 ? "middle" :
-                  d.x < Math.PI ? "start" : "end"
-                )
-                .style("font-weight", d =>
-                  d.depth <= 1 ? "bold" : "normal"
-                )
-                .style("font-size", d =>
-                  d.depth === 0 ? "30px" : "15px"
-                )
-                .style("fill", d=>d.color)
-                .text(d=>d.data.name)
-                .call(wrap, 80);
+          // texte + wrapping
+          ng.append("text")
+            // position & align
+            .attr("x", d=> d.depth===0?0: d.x<Math.PI?12:-12)
+            .attr("dy", d=> d.depth===0?"-1.6em":"0.31em")
+            .attr("text-anchor", d=>
+              d.depth===0?"middle":
+              d.x<Math.PI?"start":"end"
+            )
+            // styles AVANT wrap
+            .style("font-weight", d=> d.depth<=1?"bold":"normal")
+            .style("font-size",   d=> d.depth===0?"30px":"15px")
+            .style("fill",        d=> d.color)
+            // contenu + wrap
+            .text(d=>d.data.name)
+            .call(wrap, 80);
 
-              return ng;
-            },
-            upd => upd.transition().duration(300)
-                      .attr("transform", d => {
-                        const ang = d.x - Math.PI/2;
-                        return `translate(${d.y*Math.cos(ang)},${d.y*Math.sin(ang)})`;
-                      }),
-            exit => exit.remove()
-          );
-      }
+          return ng;
+        },
+        upd => upd.transition().duration(300)
+          .attr("transform", d => {
+            const ang = d.x - Math.PI/2;
+            return `translate(${d.y*Math.cos(ang)},${d.y*Math.sin(ang)})`;
+          }),
+        exit => exit.remove()
+      );
+  }
+
+  update();
+  return svg.node();
+}
+
 
       update();
       return svg.node();
     }
 
-    // 5) Rendu et resize
+    // 7) rendu + resize
     const container = document.getElementById("chart");
     function render() {
       container.innerHTML = "";

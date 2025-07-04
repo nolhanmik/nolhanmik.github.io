@@ -193,6 +193,14 @@
         d._children = d.children || null;
       });
 
+      root.each(d => {
+      // si on est à un nœud de profondeur ≥ 2, on le ferme
+        if (d.depth >= 2 && d.children) {
+          d._children = d.children;  // on stocke les enfants
+          d.children  = null;        // on les cache
+        }
+      });
+
       // 2) couleur racine
       root.color = rootColor;
 

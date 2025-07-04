@@ -178,8 +178,30 @@
         }
       });
     }
+  // Recursion pour plier *tout* le sous‐arbre d'un nœud
+    function collapseAll(d) {
+      if (!d.children) return;
+      d.children.forEach(collapseAll);
+      d._children = d.children;
+      d.children = null;
+    }
     
-    function chart() {
+    // Colorisation selon la profondeur et l’axe parent
+    function applyColors(root) {
+      root.color = rootColor;
+      root.children.forEach((ax, i) => ax.color = axisColors[i]);
+      root.each(d => {
+        if (d.depth >= 2) {
+          // on trouve l’ancêtre de depth=1
+          let anc = d;
+          while (anc.depth > 1) anc = anc.parent;
+          const factor = 0.7 + 0.3 * (d.depth - 1);
+          d.color = d3.color(anc.color).brighter(factor).formatHex();
+        }
+      });
+    }
+  
+  function chart() {
   const tree = d3.tree().size([2*Math.PI, radius]);
   const root = d3.hierarchy(data);
 

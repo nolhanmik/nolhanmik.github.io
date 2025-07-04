@@ -279,21 +279,26 @@
 
               // texte
               ng.append("text")
-                .text(d => d.data.name)
-                .style("font-weight", d => d.depth <= 1 ? "bold" : "normal")
-                .style("font-size", d => d.depth === 0 ? "30px" : "15px")
-                .style("fill", d => d.color)
-                .call(wrap, 80)   // largeur max en pixel
-                .attr("dy", d => d.depth === 0 ? "-1.6em" : "0.31em")
+                .attr("x", d =>
+                  d.depth === 0 ? 0 :
+                  d.x < Math.PI ? 12 : -12
+                )
+                .attr("dy", d =>
+                  d.depth === 0 ? "-1.6em" : "0.31em"
+                )
                 .attr("text-anchor", d =>
                   d.depth === 0 ? "middle" :
                   d.x < Math.PI ? "start" : "end"
                 )
-                .attr("x", d =>
-                  d.depth === 0 ? 0 :
-                  d.x < Math.PI ? 12 : -12
-                );
-
+                .text(d => d.data.name)
+                .call(wrap, 80)         // wrapping après position et texte
+                .style("font-weight", d =>
+                  d.depth <= 1 ? "bold" : "normal"
+                )
+                .style("font-size", d =>
+                  d.depth === 0 ? "30px" : "15px"
+                )
+                .style("fill", d => d.color);
               return ng;
             },
             upd => upd.transition().duration(300)

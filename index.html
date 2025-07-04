@@ -194,8 +194,8 @@
       });
 
       root.each(d => {
-      // si on est à un nœud de profondeur ≥ 2, on le ferme
-        if (d.depth >= 2 && d.children) {
+      // si on est à un nœud de profondeur ≥ 1, on le ferme
+        if (d.depth >= 1 && d.children) {
           d._children = d.children;  // on stocke les enfants
           d.children  = null;        // on les cache
         }
